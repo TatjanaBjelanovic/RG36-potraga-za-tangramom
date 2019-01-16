@@ -1,0 +1,13 @@
+Projekat PRONADJI TANGRAM
+
+Sastoji se iz animacije kocke koji se rotira i kreće, na taster "g" ili "G" se pokreće, a na "s" ili "S" se stopira , i tada se slučajnim izborom bira koji će se tangram slagati,
+zatim se priticne bilo koji taster osim 'o', a zarim i 'o' da bi ušao mesto za slaganje tangrama.
+Kada se slaže tangram na tastere bojeva od 1 do 7 pomeraju se elementi, na način:
+1 - veliki trougao 1
+2 - veliki trougao 2
+3 - mali trougao 1
+4 - mali trougao 2
+5 - kvadrat
+6 - paralelogram
+7 - srednji trougao,
+Svaki od ovih elemenata ima svoje mesto na slici, tj. figuri koja se iscrtava, pomeranjem na tastere "a","s","d","w" se vrši translacija, pomeranje, levo, dole, desno, gore, a na "l" i "j" rotira elemenate. Kada elementu nađemo mesto više ne možemo da pomeramo taj element. Kad više ne možemo da pokrećemo ni jedan element tada smo sastavili celu sliku.
