@@ -12,7 +12,9 @@
    static void on_keyboard(unsigned char key, int x, int y);
    static void on_reshape(int width, int height);
    static void on_display(void);
-      static void on_display1(void);
+   
+   //deklaracija funkcija koje pozivaju odredjenu tablu na kojoj se nalazi jedna od varijanti tangrama za slagenje
+   static void on_display1(void);
    static void on_display2(void);
    static void on_display3(void);
    static void on_display4(void);
@@ -22,8 +24,6 @@
    static void on_timer(int);
     
   
-   
-   
   static void draw_debug_coosys();
    
     
@@ -31,13 +31,28 @@
     * animacija u toku ili nije */
  #define TIMER_ID 0
  #define TIMER_INTERVAL 10
+ 
+ 
+ 
  float animation_parameter = 0;
  int animation_ongoing = 0;
  float animation_parameter2=-10.0;
- int ind=0,ind1=-1;
+ int animacija_u_pokretu = 0;
+ 
+ 
+ 
+ 
+ int kraj = 0;
+ int ind=0,ind1=-1; //ind -> indikator za       ind2 -> indikator za
  int red = 0;
 /* struktura koja pamti pozicije trenutnih transformacija koje su se izvele nad
 odredjenim elementom*/ 
+
+
+//promeniljive za tangram
+int pocni = 0;
+
+
 
 static float rotation_parameter= 0;
 static float translaton_parameter_X = 0;
@@ -45,14 +60,14 @@ static float translaton_parameter_Y = 0;
 
 /*Transformacija *koordinate ;*/
 
-static int ID = 0, br=-5;
+static int ID = 0, br=-5; //id ->        br->
 
 //kordinate mreze
 
 Transformacija *koordinate;
 
 Slika *tacke;
-       
+       int smer = 1;
     
 void linije(float x11, float y11, float x22, float y22)
 {
@@ -98,13 +113,14 @@ void kretanje()
       
      static void on_keyboard(unsigned char key, int x, int y)
      {
-        if(ind==0){
+        if(kraj==0){
                     switch (key) {
                     case 27:
                         exit(0);
                         break;
                     case 'g':
                     case 'G':
+                        animacija_u_pokretu = 1;
                             if(!animation_ongoing){
                 
                                     animation_ongoing=1;
@@ -114,28 +130,39 @@ void kretanje()
                     
                     
                     case 'r':
-                        animation_ongoing=0;
                         animation_parameter = 0;
                         animation_ongoing = 0;
-                        animation_parameter2=3.0;
-                        ind=0;
+                        animation_parameter2=-10.0;
+                        animacija_u_pokretu = 0;
+                        kraj = 0;
+                        ind=0,ind1=-1; //ind -> indikator za       ind2 -> indikator za
+                        red = 0;
                         glutDisplayFunc(on_display);
-                        
-                    break;
+                        break;
                         
                     case 's':
                     case 'S':
-                        if(ind==0){
-                        ind=1;
-                        srand(time(0));
-                        ind1=rand()%6;
-                        //ind1 = 0;
-                        printf("%d\n",ind1);
-                        red = 1;
-                        animation_ongoing=0;
-                        animation_parameter = 0;
-                        animation_ongoing = 0;
-                        animation_parameter2=3.0;
+                        if(animacija_u_pokretu != 0 ){ // MOZEMO DA ZAUSTAVIMO SAM AKO JE VEC U POKRETU INACE NISTA
+                            kraj =1;
+                            if(ind==0){
+                                ind=1;
+                                srand(time(0)); // random od ponudjenih 6 biramo onu koja treba da se slaze  
+                                ind1=rand()%6; //ind1 koja ce da se slaze...
+                                
+                                if(ind1 % 2 != 0)
+                                    smer = -1;
+                                
+                                printf("indikator ind1 : %d\n", ind1);
+                                printf("indikator ind : %d\n", ind);
+                                red = 1;
+                                animation_ongoing=0;
+                                animation_parameter = 0;
+                                animation_parameter2=-10.0;
+                                glutDisplayFunc(on_display);
+                                
+                            }
+                            animacija_u_pokretu = 0;
+                            
                         }
                         break;
                     }
@@ -156,35 +183,61 @@ void kretanje()
            */
                 
             
-                
+               
             switch (key) {
-                case 27:
+            case 27:
                     exit(0);
                     break;
             
+            case 'r':
+                    animation_parameter = 0;
+                    animation_ongoing = 0;
+                    animation_parameter2=-10.0;
+                    animacija_u_pokretu = 0;
+ 
+ 
+ 
+ 
+                     kraj = 0;
+                     ind=0,ind1=-1; //ind -> indikator za       ind2 -> indikator za sliku koja  ce da se primenjuje
+                     red = 0;
+                     glutDisplayFunc(on_display);
+                        
+                    break;
                     
-                case 'o':
-                    
+            case 'o':
+            {
+                
+                
                 if(ind1==0){
                     red = 5;
+                    smer = -1;
                     glutDisplayFunc(on_display1);
                     
+                }
+                else if(ind1==1){
+                    glutDisplayFunc(on_display2);
+                }
+                else if(ind1==2){
+                    glutDisplayFunc(on_display3);
+                }
+                else if(ind1==3){
+                    smer = -1;
+                    glutDisplayFunc(on_display4);
                     
                 }
-                else if(ind1==1)
-                    glutDisplayFunc(on_display2);
-                else if(ind1==2)
-                    glutDisplayFunc(on_display3);
-                else if(ind1==3)
-                        glutDisplayFunc(on_display4);
-                else if(ind1==4)
+                else if(ind1==4){
                     glutDisplayFunc(on_display5);
-                else if(ind1==5)
+                }
+                else if(ind1==5){
+                    smer = -1;
                     glutDisplayFunc(on_display6);
+                }
+                
                 break;
                 
                 
-                
+            }   
             case 'a':
                     translaton_parameter_X -= 0.01;   
                 break;
@@ -194,7 +247,7 @@ void kretanje()
             case 'w':
                     translaton_parameter_Y += 0.01;   
                 break;
-            case 's':
+            case 'x':
                     translaton_parameter_Y -= 0.01;   
                 break;
             
@@ -289,8 +342,16 @@ void kretanje()
               	   glutPostRedisplay();
 
      }
-     static void on_display(void)
+    
+    
+
+    
+    static void on_display(void)
      {
+         
+          glClear(GL_COLOR_BUFFER_BIT);
+          glClearColor(0, 0, 0, 0);
+          glEnable(GL_DEPTH_TEST);
         /* Pozicija svetla (u pitanju je beskonacno daleko svetlo). */
          GLfloat light_position[] = {10,10,10, 0 };
       
@@ -301,21 +362,23 @@ void kretanje()
          glMatrixMode(GL_MODELVIEW);
          glLoadIdentity();
       
+        
+         
          
          printf("\n%d\n", red);
          if(ind == 1){
                     if(ind1==0){
                         
-                        printf("\n%d\n", red);
+                        
                         if(red != 1)
                         {
-                            printf("usao u if");
-                            gluLookAt(0,0,2,0,0,0,0,1,0);
+                            
+                            gluLookAt(0,0,2,0,0,0,0,1,1);
                         }
                         else{
                             red += 5;
-                            gluLookAt(10,0,0, 0, 0, 0, 0, 1, 0);
-                            printf("usao u else");
+                            gluLookAt(3,0,0, 0, 0, 0, 0, 1, 0);
+                            
 
                         }
                     }
@@ -323,66 +386,65 @@ void kretanje()
                     else if(ind1 ==1){
                         if(red != 1)
                         {
-                            printf("usao u if");
-                            gluLookAt(0,0,2,0,0,0,0,1,0);
+                            
+                            gluLookAt(0,0,2,0,0,0,0,1,1);
                         }
                         else{
                             red += 5;
-                        gluLookAt(-10,0,0, 0, 0, 0, 0, 1, 0);
+                            gluLookAt(smer*3,0,0, 0, 0, 0, 0, 1, 0);// mnozi se sa smer da bi se videla slika sa prave strane
                         }
                     }
                     else if(ind1 == 2){
-                        printf("\n%d\n", red);
+                        
                         if(red != 1)
                         {
-                            printf("usao u if");
+                            
                             gluLookAt(0,0,2,0,0,0,0,1,0);
                         }
                         else{
                             red += 5;
-                            gluLookAt(0,0,5, 0, 0, 0, 0, 1, 0);
-                            printf("usao u else");
-
+                            gluLookAt(0,0,3, 0, 0, 0, 0, 1, 0);
+                            
                         }
                     }
                     else if(ind1 == 3){
-                        printf("\n%d\n", red);
+                       
                         if(red != 1)
                         {
-                            printf("usao u if");
+                            
                             gluLookAt(0,0,2,0,0,0,0,1,0);
                         }
                         else{
                             red += 5;
-                            gluLookAt(0,0,-5, 0, 0, 0, 0, 1, 0);
-                            printf("usao u else");
+                            gluLookAt(0,0,smer*3, 0, 0, 0, 0, 1, 0); // mnozi se sa smer da bi se videla slika sa prave strane
+                            
 
                         }
                     }
                     else if(ind1 == 4){
-                        printf("\n%d\n", red);
+                        
                         if(red != 1)
                         {
-                            printf("usao u if");
-                            gluLookAt(0,0,2,0,0,0,0,1,0);
+                            
+                            gluLookAt(0,0,2,0,0,0,0,1,1);
                         }
                         else{
                             red += 5;
-                            gluLookAt(0,10,0, 0, 0, 0, 0, 1, 0);
-                            printf("usao u else");
+                            gluLookAt(0,3,0, 0, 0, 0, 0, 0, 1);
+                            
                         }
                     }
                     else if(ind1 == 5){
-                        printf("\n%d\n", red);
+                        
                         if(red != 1)
                         {
-                            printf("usao u if");
-                            gluLookAt(0,0,2,0,0,0,0,1,0);
+                           
+                            gluLookAt(0,0,2,0,0,0,0,1,1);
                         }
                         else{
                             red += 5;
-                            gluLookAt(0,-10,0, 0, 0, 0, 0, 1, 0);
-                            printf("usao u else");
+                            gluLookAt(0,smer*3,0, 0, 0, 0, 0, 0, 1);
+                            
                         }
                     }
                 
@@ -390,12 +452,12 @@ void kretanje()
                 
             else
             {
-            gluLookAt(5+animation_parameter2,5,5,0,0,0,0,1,0);
+                    gluLookAt(5+animation_parameter2,5,5,0,0,0,0,1,0);
             }
         
         
         //gluLookAt(-2,8,3,0,0,0,0,1,0);
-        glShadeModel(GL_SMOOTH);
+        //glShadeModel(GL_SMOOTH);
       
         
         
@@ -407,6 +469,8 @@ void kretanje()
 
       
         glPushMatrix();
+        
+        
         glRotatef(-animation_parameter,0,0,1);
         glRotatef(animation_parameter-0.25 ,0,1,0);
         glRotatef(-animation_parameter,1,0,0);
@@ -414,13 +478,17 @@ void kretanje()
       
         
         
-        
+// pocetna kocka        
         
         glPushMatrix();
             //glTranslatef(0,0.25,0);
             glutSolidCube(2);
         glPopMatrix();
-     
+
+        
+        // slike koje su "zalepljene na kocku"  
+        
+        
         glPushMatrix();
         	// strana pozitivna x-osa
          	glTranslatef(1.01,0,0);
@@ -465,10 +533,6 @@ void kretanje()
 
 
 	   
-    
-    
-        
-         
         /* Nova slika se salje na ekran. */
          glutSwapBuffers();
      }
@@ -500,7 +564,7 @@ void kretanje()
          glutKeyboardFunc(on_keyboard);
          glutReshapeFunc(on_reshape);
          if(ind == 0)
-         glutDisplayFunc(on_display);
+            glutDisplayFunc(on_display);
       
          /* Obavlja se OpenGL inicijalizacija. */
          glClearColor(0, 0, 0, 0);
@@ -548,9 +612,9 @@ void kretanje()
          /*postavljamo tajmer dok je manje od 90 stepeni animacija se pokrece i povecavaju se
           ili smanjuju odredjeni parmetri*/
          if(animation_parameter<=3600){
-           animation_parameter += 0.5;
-      
-          animation_parameter2+=0.017;
+             
+            animation_parameter += 0.5;
+            animation_parameter2+=0.017;
       /*
           if(animation_parameter2>=8)
               animation_parameter2=0;
@@ -577,7 +641,8 @@ void kretanje()
          gluPerspective(60, (float) width / height, 1, 100);
      }
       
-    
+      
+// slike koje se pojavljuju posle pritisnutog tastera 'o'
 static void on_display6(void)
 {
     
@@ -589,6 +654,8 @@ static void on_display6(void)
         
 
     glDisable(GL_LIGHTING);
+    
+    
     glPushMatrix();
             glTranslatef(0,0,1);
 
@@ -606,7 +673,7 @@ static void on_display6(void)
         if(ID == 1)
             {
                 printf("usao\n");
-                if(translaton_parameter_X>= 0.25  && translaton_parameter_Y>= 0.25 && rotation_parameter == 180 )
+                if(translaton_parameter_X == 0.25  && translaton_parameter_Y== 0.25 && rotation_parameter == 180 )
                 {
                     ID=0;
                     
@@ -650,7 +717,7 @@ static void on_display6(void)
          if(ID == 2)
             {
                 
-                if(translaton_parameter_X<= -0.25  && translaton_parameter_Y<=- 0.25 && rotation_parameter == 0 )
+                if(translaton_parameter_X== -0.25  && translaton_parameter_Y== -0.25 && rotation_parameter == 0 )
                 {
                     ID=0;
                     
@@ -696,7 +763,7 @@ static void on_display6(void)
          if(ID == 3)
             {
                 
-                if(translaton_parameter_X>= 0.25/2  && translaton_parameter_Y<= -0.25 && rotation_parameter == -90 )
+                if(translaton_parameter_X ==  0.25/2  && translaton_parameter_Y == -0.25 && rotation_parameter == -90 )
                 {
                     ID=0;
                     
@@ -737,7 +804,7 @@ static void on_display6(void)
         if(ID == 4)
             {
                 
-                if(translaton_parameter_X<= -0.25/2  && translaton_parameter_Y<= -0.25 && rotation_parameter == 180 )
+                if(translaton_parameter_X == -0.25/2  && translaton_parameter_Y == -0.25 && rotation_parameter == 180 )
                 {
                     ID=0;
                     
@@ -781,7 +848,7 @@ static void on_display6(void)
         if(ID == 5)
             {
                 
-                if(translaton_parameter_X<=-0.25/2   && translaton_parameter_Y<=-0.5  && rotation_parameter == 0 )
+                if(translaton_parameter_X == -0.25/2   && translaton_parameter_Y ==-0.5  && rotation_parameter == 0 )
                 {
                     ID=0;
                     
@@ -823,7 +890,7 @@ static void on_display6(void)
     glPushMatrix();
          if(ID == 6)
             {
-                if(translaton_parameter_X>= 0.25  && translaton_parameter_Y>= 0.6 && rotation_parameter == 135 )
+                if(translaton_parameter_X == 0.25  && translaton_parameter_Y == 0.6 && rotation_parameter == 135 )
                 {
                     ID=0;
                     
@@ -858,7 +925,7 @@ static void on_display6(void)
         
             if(ID == 7)
             {
-                if(translaton_parameter_X<= -0.25  && translaton_parameter_Y>= 0.25 && rotation_parameter == 0 )
+                if(translaton_parameter_X == -0.25  && translaton_parameter_Y == 0.25 && rotation_parameter == 0 )
                 {
                     ID=0;
                     
@@ -903,7 +970,7 @@ static void on_display5(void)
     
     glClear(GL_COLOR_BUFFER_BIT);
 	//glTranslatef(0,1,2);
-        glClearColor(0.75, 0.75, 0.75, 0);
+        glClearColor(0.75, 0.75, 0.75, 0); //boja
         
         glDisable(GL_DEPTH_TEST);
         
@@ -1019,7 +1086,7 @@ static void on_display5(void)
                     koordinate[3].RT = 0;
                     glTranslatef(0+koordinate[3].TR_X,0+koordinate[3].TR_Y,0);
                     glRotatef(-(0+koordinate[3].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                    //printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1030,8 +1097,8 @@ static void on_display5(void)
                     koordinate[3].TR_Y = translaton_parameter_Y;
                     koordinate[3].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
-                    printf("%f%f%f\n", tacke[3].slika_TX, tacke[3].slika_TY, tacke[3].slika_R);
+                    //printf("%f %f %f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
+                    //printf("%f%f%f\n", tacke[3].slika_TX, tacke[3].slika_TY, tacke[3].slika_R);
                 }
             }
             else
@@ -1040,7 +1107,7 @@ static void on_display5(void)
                 glRotatef(-(0+koordinate[3].RT), 0, 0, 1);
             }
         
-        printf("%.2f %.2f %.2f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
+        //printf("%.2f %.2f %.2f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
     
     MALI_TROUGAO1();
     glPopMatrix();
@@ -1061,7 +1128,7 @@ static void on_display5(void)
                     koordinate[4].RT = 180;
                     glTranslatef(0+koordinate[4].TR_X,0+koordinate[4].TR_Y,0);
                     glRotatef(-(0+koordinate[4].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                    //printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1072,8 +1139,8 @@ static void on_display5(void)
                     koordinate[4].TR_Y = translaton_parameter_Y;
                     koordinate[4].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
-                    printf("%f%f%f\n", tacke[4].slika_TX, tacke[4].slika_TY, tacke[4].slika_R);
+                    //printf("%f %f %f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
+                    //printf("%f%f%f\n", tacke[4].slika_TX, tacke[4].slika_TY, tacke[4].slika_R);
                 }
             }
             else
@@ -1084,7 +1151,7 @@ static void on_display5(void)
     
         
         
-        printf("%.2f %.2f %.2f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
+        //printf("%.2f %.2f %.2f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
         
     MALI_TROUGAO2();
     glPopMatrix();
@@ -1106,7 +1173,7 @@ static void on_display5(void)
                     koordinate[5].RT = 0;
                     glTranslatef(0+koordinate[5].TR_X,0+koordinate[5].TR_Y,0);
                     glRotatef(-(0+koordinate[5].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                    //printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1117,8 +1184,8 @@ static void on_display5(void)
                     koordinate[5].TR_Y = translaton_parameter_Y;
                     koordinate[5].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
-                    printf("%f%f%f\n", tacke[5].slika_TX, tacke[5].slika_TY, tacke[5].slika_R);
+                    //printf("%f %f %f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
+                    //printf("%f%f%f\n", tacke[5].slika_TX, tacke[5].slika_TY, tacke[5].slika_R);
                 }
             }
             else
@@ -1127,7 +1194,7 @@ static void on_display5(void)
                 glRotatef(-(0+koordinate[5].RT), 0, 0, 1);
             }
     
-    printf("%.2f %.2f %.2f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
+    //printf("%.2f %.2f %.2f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
     
     KVADRAT();
     glPopMatrix();
@@ -1151,7 +1218,7 @@ static void on_display5(void)
                     koordinate[6].RT = 0;
                     glTranslatef(0+koordinate[6].TR_X,0+koordinate[6].TR_Y,0);
                     glRotatef(-(0+koordinate[6].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                    //printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1162,8 +1229,8 @@ static void on_display5(void)
                     koordinate[6].TR_Y = translaton_parameter_Y;
                     koordinate[6].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
-                    printf("%f%f%f\n", tacke[6].slika_TX, tacke[6].slika_TY, tacke[6].slika_R);
+                    //printf("%f %f %f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
+                    //printf("%f%f%f\n", tacke[6].slika_TX, tacke[6].slika_TY, tacke[6].slika_R);
                 }
             }
             else
@@ -1172,7 +1239,7 @@ static void on_display5(void)
                 glRotatef(-(0+koordinate[6].RT), 0, 0, 1);
             }
     
-    printf("%.2f %.2f %.2f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
+    //printf("%.2f %.2f %.2f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
     PARALELOGRA();
     glPopMatrix();
     
@@ -1181,7 +1248,7 @@ static void on_display5(void)
         
             if(ID == 7)
             {
-                printf("usao\n");
+                //printf("usao\n");
                 if(translaton_parameter_X<= -0.5  && translaton_parameter_Y>= 0.25 && rotation_parameter == 0 )
                 {
                     ID=0;
@@ -1191,7 +1258,7 @@ static void on_display5(void)
                     koordinate[7].RT = 0;
                     glTranslatef(0+koordinate[7].TR_X,0+koordinate[7].TR_Y,0);
                     glRotatef(-(0+koordinate[7].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                    //printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1202,8 +1269,8 @@ static void on_display5(void)
                     koordinate[7].TR_Y = translaton_parameter_Y;
                     koordinate[7].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
-                    printf("%f%f%f\n", tacke[7].slika_TX, tacke[7].slika_TY, tacke[7].slika_R);
+                    //printf("%f %f %f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
+                    //printf("%f%f%f\n", tacke[7].slika_TX, tacke[7].slika_TY, tacke[7].slika_R);
                 }
             }
             else
@@ -1214,7 +1281,7 @@ static void on_display5(void)
         
     
     
-    printf("%.2f %.2f %.2f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
+    //printf("%.2f %.2f %.2f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
     
     SREDNJI_TROUGAO();
     glPopMatrix();
@@ -1263,7 +1330,7 @@ static void on_display4(void)
                     koordinate[1].RT = 90;
                     glTranslatef(0+koordinate[1].TR_X,0+koordinate[1].TR_Y,0);
                     glRotatef(-(0+koordinate[1].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                   // printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1274,8 +1341,8 @@ static void on_display4(void)
                     koordinate[1].TR_Y = translaton_parameter_Y;
                     koordinate[1].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[1].TR_X, koordinate[1].TR_Y, koordinate[1].RT);
-                    printf("%f%f%f\n", tacke[1].slika_TX, tacke[1].slika_TY, tacke[1].slika_R);
+                   // printf("%f %f %f\n",koordinate[1].TR_X, koordinate[1].TR_Y, koordinate[1].RT);
+                    //printf("%f%f%f\n", tacke[1].slika_TX, tacke[1].slika_TY, tacke[1].slika_R);
                 }
             }
             else
@@ -1285,7 +1352,7 @@ static void on_display4(void)
             }
     
     
-        printf("%.2f %.2f %.2f\n",koordinate[1].TR_X, koordinate[1].TR_Y, koordinate[1].RT);
+       // printf("%.2f %.2f %.2f\n",koordinate[1].TR_X, koordinate[1].TR_Y, koordinate[1].RT);
         
         
              
@@ -1309,7 +1376,7 @@ static void on_display4(void)
                     koordinate[2].RT = 180;
                     glTranslatef(0+koordinate[2].TR_X,0+koordinate[2].TR_Y,0);
                     glRotatef(-(0+koordinate[2].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                    //printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1320,8 +1387,8 @@ static void on_display4(void)
                     koordinate[2].TR_Y = translaton_parameter_Y;
                     koordinate[2].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[2].TR_X, koordinate[2].TR_Y, koordinate[2].RT);
-                    printf("%f%f%f\n", tacke[2].slika_TX, tacke[2].slika_TY, tacke[2].slika_R);
+                    //printf("%f %f %f\n",koordinate[2].TR_X, koordinate[2].TR_Y, koordinate[2].RT);
+                    //printf("%f%f%f\n", tacke[2].slika_TX, tacke[2].slika_TY, tacke[2].slika_R);
                 }
             }
             else
@@ -1332,7 +1399,7 @@ static void on_display4(void)
 
         
         
-        printf("%.2f %.2f %.2f\n",koordinate[2].TR_X, koordinate[2].TR_Y, koordinate[2].RT);
+        //printf("%.2f %.2f %.2f\n",koordinate[2].TR_X, koordinate[2].TR_Y, koordinate[2].RT);
         
         VELIKI_TROUGAO2();
         
@@ -1355,7 +1422,7 @@ static void on_display4(void)
                     koordinate[3].RT = 0;
                     glTranslatef(0+koordinate[3].TR_X,0+koordinate[3].TR_Y,0);
                     glRotatef(-(0+koordinate[3].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                    //printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1366,8 +1433,8 @@ static void on_display4(void)
                     koordinate[3].TR_Y = translaton_parameter_Y;
                     koordinate[3].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
-                    printf("%f%f%f\n", tacke[3].slika_TX, tacke[3].slika_TY, tacke[3].slika_R);
+                   // printf("%f %f %f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
+                   // printf("%f%f%f\n", tacke[3].slika_TX, tacke[3].slika_TY, tacke[3].slika_R);
                 }
             }
             else
@@ -1376,7 +1443,7 @@ static void on_display4(void)
                 glRotatef(-(0+koordinate[3].RT), 0, 0, 1);
             }
         
-        printf("%.2f %.2f %.2f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
+        //printf("%.2f %.2f %.2f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
     
     MALI_TROUGAO1();
     glPopMatrix();
@@ -1397,7 +1464,7 @@ static void on_display4(void)
                     koordinate[4].RT = -90;
                     glTranslatef(0+koordinate[4].TR_X,0+koordinate[4].TR_Y,0);
                     glRotatef(-(0+koordinate[4].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                    //printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1408,8 +1475,8 @@ static void on_display4(void)
                     koordinate[4].TR_Y = translaton_parameter_Y;
                     koordinate[4].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
-                    printf("%f%f%f\n", tacke[4].slika_TX, tacke[4].slika_TY, tacke[4].slika_R);
+                   // printf("%f %f %f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
+                   // printf("%f%f%f\n", tacke[4].slika_TX, tacke[4].slika_TY, tacke[4].slika_R);
                 }
             }
             else
@@ -1420,7 +1487,7 @@ static void on_display4(void)
     
         
         
-        printf("%.2f %.2f %.2f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
+        //printf("%.2f %.2f %.2f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
         
     MALI_TROUGAO2();
     glPopMatrix();
@@ -1432,7 +1499,7 @@ static void on_display4(void)
     glPushMatrix();
         if(ID == 5)
             {
-                printf("usao\n");
+               //printf("usao\n");
                 if(translaton_parameter_X<=0   && translaton_parameter_Y<= -0.25/2  && rotation_parameter == 0 )
                 {
                     ID=0;
@@ -1442,7 +1509,7 @@ static void on_display4(void)
                     koordinate[5].RT = 0;
                     glTranslatef(0+koordinate[5].TR_X,0+koordinate[5].TR_Y,0);
                     glRotatef(-(0+koordinate[5].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                   // printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1453,8 +1520,8 @@ static void on_display4(void)
                     koordinate[5].TR_Y = translaton_parameter_Y;
                     koordinate[5].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
-                    printf("%f%f%f\n", tacke[5].slika_TX, tacke[5].slika_TY, tacke[5].slika_R);
+                    //printf("%f %f %f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
+                    //printf("%f%f%f\n", tacke[5].slika_TX, tacke[5].slika_TY, tacke[5].slika_R);
                 }
             }
             else
@@ -1463,7 +1530,7 @@ static void on_display4(void)
                 glRotatef(-(0+koordinate[5].RT), 0, 0, 1);
             }
     
-    printf("%.2f %.2f %.2f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
+   // printf("%.2f %.2f %.2f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
     
     KVADRAT();
     glPopMatrix();
@@ -1477,7 +1544,7 @@ static void on_display4(void)
     glPushMatrix();
          if(ID == 6)
             {
-                printf("usao\n");
+             //   printf("usao\n");
                 if(translaton_parameter_X>= 0.5  && translaton_parameter_Y<= -0.25/2 && rotation_parameter == 90 )
                 {
                     ID=0;
@@ -1487,7 +1554,7 @@ static void on_display4(void)
                     koordinate[6].RT = 90;
                     glTranslatef(0+koordinate[6].TR_X,0+koordinate[6].TR_Y,0);
                     glRotatef(-(0+koordinate[6].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                //    printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1498,8 +1565,8 @@ static void on_display4(void)
                     koordinate[6].TR_Y = translaton_parameter_Y;
                     koordinate[6].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
-                    printf("%f%f%f\n", tacke[6].slika_TX, tacke[6].slika_TY, tacke[6].slika_R);
+                //    printf("%f %f %f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
+                //    printf("%f%f%f\n", tacke[6].slika_TX, tacke[6].slika_TY, tacke[6].slika_R);
                 }
             }
             else
@@ -1508,7 +1575,7 @@ static void on_display4(void)
                 glRotatef(-(0+koordinate[6].RT), 0, 0, 1);
             }
     
-    printf("%.2f %.2f %.2f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
+   // printf("%.2f %.2f %.2f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
     PARALELOGRA();
     glPopMatrix();
     
@@ -1517,7 +1584,7 @@ static void on_display4(void)
         
             if(ID == 7)
             {
-                printf("usao\n");
+              //  printf("usao\n");
                 if(translaton_parameter_X>= 0.5  && translaton_parameter_Y<= -0.25-0.25/2 && rotation_parameter == 90 )
                 {
                     ID=0;
@@ -1527,7 +1594,7 @@ static void on_display4(void)
                     koordinate[7].RT = 90;
                     glTranslatef(0+koordinate[7].TR_X,0+koordinate[7].TR_Y,0);
                     glRotatef(-(0+koordinate[7].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                   // printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1538,8 +1605,8 @@ static void on_display4(void)
                     koordinate[7].TR_Y = translaton_parameter_Y;
                     koordinate[7].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
-                    printf("%f%f%f\n", tacke[7].slika_TX, tacke[7].slika_TY, tacke[7].slika_R);
+                  //  printf("%f %f %f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
+                   // printf("%f%f%f\n", tacke[7].slika_TX, tacke[7].slika_TY, tacke[7].slika_R);
                 }
             }
             else
@@ -1550,7 +1617,7 @@ static void on_display4(void)
         
     
     
-    printf("%.2f %.2f %.2f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
+   // printf("%.2f %.2f %.2f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
     
     SREDNJI_TROUGAO();
     glPopMatrix();
@@ -1590,7 +1657,7 @@ static void on_display3(void)
     
         if(ID == 1)
             {
-                printf("usao\n");
+             //   printf("usao\n");
                 if(translaton_parameter_X<= 0  && translaton_parameter_Y>= 0.5 && rotation_parameter == 180 )
                 {
                     ID=0;
@@ -1600,7 +1667,7 @@ static void on_display3(void)
                     koordinate[1].RT = 180;
                     glTranslatef(0+koordinate[1].TR_X,0+koordinate[1].TR_Y,0);
                     glRotatef(-(0+koordinate[1].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                   // printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1611,8 +1678,8 @@ static void on_display3(void)
                     koordinate[1].TR_Y = translaton_parameter_Y;
                     koordinate[1].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[1].TR_X, koordinate[1].TR_Y, koordinate[1].RT);
-                    printf("%f%f%f\n", tacke[1].slika_TX, tacke[1].slika_TY, tacke[1].slika_R);
+                  //  printf("%f %f %f\n",koordinate[1].TR_X, koordinate[1].TR_Y, koordinate[1].RT);
+                  //  printf("%f%f%f\n", tacke[1].slika_TX, tacke[1].slika_TY, tacke[1].slika_R);
                 }
             }
             else
@@ -1622,7 +1689,7 @@ static void on_display3(void)
             }
     
     
-        printf("%.2f %.2f %.2f\n",koordinate[1].TR_X, koordinate[1].TR_Y, koordinate[1].RT);
+       // printf("%.2f %.2f %.2f\n",koordinate[1].TR_X, koordinate[1].TR_Y, koordinate[1].RT);
         
         
              
@@ -1636,7 +1703,7 @@ static void on_display3(void)
     glPushMatrix();
          if(ID == 2)
             {
-                printf("usao\n");
+              //  printf("usao\n");
                 if(translaton_parameter_X<= 0  && translaton_parameter_Y<= 0 && rotation_parameter == 0 )
                 {
                     ID=0;
@@ -1646,7 +1713,7 @@ static void on_display3(void)
                     koordinate[2].RT = 0;
                     glTranslatef(0+koordinate[2].TR_X,0+koordinate[2].TR_Y,0);
                     glRotatef(-(0+koordinate[2].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                //    printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1657,8 +1724,8 @@ static void on_display3(void)
                     koordinate[2].TR_Y = translaton_parameter_Y;
                     koordinate[2].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[2].TR_X, koordinate[2].TR_Y, koordinate[2].RT);
-                    printf("%f%f%f\n", tacke[2].slika_TX, tacke[2].slika_TY, tacke[2].slika_R);
+                  //  printf("%f %f %f\n",koordinate[2].TR_X, koordinate[2].TR_Y, koordinate[2].RT);
+                  //  printf("%f%f%f\n", tacke[2].slika_TX, tacke[2].slika_TY, tacke[2].slika_R);
                 }
             }
             else
@@ -1669,7 +1736,7 @@ static void on_display3(void)
 
         
         
-        printf("%.2f %.2f %.2f\n",koordinate[2].TR_X, koordinate[2].TR_Y, koordinate[2].RT);
+        //printf("%.2f %.2f %.2f\n",koordinate[2].TR_X, koordinate[2].TR_Y, koordinate[2].RT);
         
         VELIKI_TROUGAO2();
         
@@ -1682,7 +1749,7 @@ static void on_display3(void)
     glPushMatrix();
          if(ID == 3)
             {
-                printf("usao\n");
+               // printf("usao\n");
                 if(translaton_parameter_X<= -0.5 && translaton_parameter_Y>= 0.25 && rotation_parameter == 0 )
                 {
                     ID=0;
@@ -1692,7 +1759,7 @@ static void on_display3(void)
                     koordinate[3].RT = 0;
                     glTranslatef(0+koordinate[3].TR_X,0+koordinate[3].TR_Y,0);
                     glRotatef(-(0+koordinate[3].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+               //     printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1703,8 +1770,8 @@ static void on_display3(void)
                     koordinate[3].TR_Y = translaton_parameter_Y;
                     koordinate[3].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
-                    printf("%f%f%f\n", tacke[3].slika_TX, tacke[3].slika_TY, tacke[3].slika_R);
+               //     printf("%f %f %f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
+               //     printf("%f%f%f\n", tacke[3].slika_TX, tacke[3].slika_TY, tacke[3].slika_R);
                 }
             }
             else
@@ -1713,7 +1780,7 @@ static void on_display3(void)
                 glRotatef(-(0+koordinate[3].RT), 0, 0, 1);
             }
         
-        printf("%.2f %.2f %.2f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
+      //  printf("%.2f %.2f %.2f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
     
     MALI_TROUGAO1();
     glPopMatrix();
@@ -1724,7 +1791,7 @@ static void on_display3(void)
     glPushMatrix();
         if(ID == 4)
             {
-                printf("usao\n");
+               // printf("usao\n");
                 if(translaton_parameter_X>= 0.5  && translaton_parameter_Y>= 0.35 && rotation_parameter == -45 )
                 {
                     ID=0;
@@ -1734,7 +1801,7 @@ static void on_display3(void)
                     koordinate[4].RT = -45;
                     glTranslatef(0+koordinate[4].TR_X,0+koordinate[4].TR_Y,0);
                     glRotatef(-(0+koordinate[4].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                 //  printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1745,8 +1812,8 @@ static void on_display3(void)
                     koordinate[4].TR_Y = translaton_parameter_Y;
                     koordinate[4].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
-                    printf("%f%f%f\n", tacke[4].slika_TX, tacke[4].slika_TY, tacke[4].slika_R);
+                  //  printf("%f %f %f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
+                  //  printf("%f%f%f\n", tacke[4].slika_TX, tacke[4].slika_TY, tacke[4].slika_R);
                 }
             }
             else
@@ -1757,7 +1824,7 @@ static void on_display3(void)
     
         
         
-        printf("%.2f %.2f %.2f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
+     //   printf("%.2f %.2f %.2f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
         
     MALI_TROUGAO2();
     glPopMatrix();
@@ -1769,7 +1836,7 @@ static void on_display3(void)
     glPushMatrix();
         if(ID == 5)
             {
-                printf("usao\n");
+              //  printf("usao\n");
                 if(translaton_parameter_X<=0.5   && translaton_parameter_Y<=0  && rotation_parameter == 45 )
                 {
                     ID=0;
@@ -1779,7 +1846,7 @@ static void on_display3(void)
                     koordinate[5].RT = 45;
                     glTranslatef(0+koordinate[5].TR_X,0+koordinate[5].TR_Y,0);
                     glRotatef(-(0+koordinate[5].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                //    printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1790,8 +1857,8 @@ static void on_display3(void)
                     koordinate[5].TR_Y = translaton_parameter_Y;
                     koordinate[5].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
-                    printf("%f%f%f\n", tacke[5].slika_TX, tacke[5].slika_TY, tacke[5].slika_R);
+                //    printf("%f %f %f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
+                //    printf("%f%f%f\n", tacke[5].slika_TX, tacke[5].slika_TY, tacke[5].slika_R);
                 }
             }
             else
@@ -1800,7 +1867,7 @@ static void on_display3(void)
                 glRotatef(-(0+koordinate[5].RT), 0, 0, 1);
             }
     
-    printf("%.2f %.2f %.2f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
+    //printf("%.2f %.2f %.2f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
     
     KVADRAT();
     glPopMatrix();
@@ -1814,7 +1881,7 @@ static void on_display3(void)
     glPushMatrix();
          if(ID == 6)
             {
-                printf("usao\n");
+           //     printf("usao\n");
                 if(translaton_parameter_X<= -0.5  && translaton_parameter_Y>= 0 && rotation_parameter == 0 )
                 {
                     ID=0;
@@ -1824,7 +1891,7 @@ static void on_display3(void)
                     koordinate[6].RT = 0;
                     glTranslatef(0+koordinate[6].TR_X,0+koordinate[6].TR_Y,0);
                     glRotatef(-(0+koordinate[6].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+             //       printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1835,8 +1902,8 @@ static void on_display3(void)
                     koordinate[6].TR_Y = translaton_parameter_Y;
                     koordinate[6].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
-                    printf("%f%f%f\n", tacke[6].slika_TX, tacke[6].slika_TY, tacke[6].slika_R);
+              //      printf("%f %f %f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
+              //      printf("%f%f%f\n", tacke[6].slika_TX, tacke[6].slika_TY, tacke[6].slika_R);
                 }
             }
             else
@@ -1845,7 +1912,7 @@ static void on_display3(void)
                 glRotatef(-(0+koordinate[6].RT), 0, 0, 1);
             }
     
-    printf("%.2f %.2f %.2f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
+  //  printf("%.2f %.2f %.2f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
     PARALELOGRA();
     glPopMatrix();
     
@@ -1854,7 +1921,7 @@ static void on_display3(void)
         
             if(ID == 7)
             {
-                printf("usao\n");
+            //    printf("usao\n");
                 if(translaton_parameter_X>= -0.5+0.2  && translaton_parameter_Y>= 0.5+0.25/4-0.01 && rotation_parameter == 180 )
                 {
                     ID=0;
@@ -1864,7 +1931,7 @@ static void on_display3(void)
                     koordinate[7].RT = 180;
                     glTranslatef(0+koordinate[7].TR_X,0+koordinate[7].TR_Y,0);
                     glRotatef(-(0+koordinate[7].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                //    printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1875,8 +1942,7 @@ static void on_display3(void)
                     koordinate[7].TR_Y = translaton_parameter_Y;
                     koordinate[7].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
-                    printf("%f%f%f\n", tacke[7].slika_TX, tacke[7].slika_TY, tacke[7].slika_R);
+              
                 }
             }
             else
@@ -1887,7 +1953,7 @@ static void on_display3(void)
         
     
     
-    printf("%.2f %.2f %.2f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
+
     
     SREDNJI_TROUGAO();
     glPopMatrix();
@@ -1924,7 +1990,7 @@ static void on_display2(void)
     
         if(ID == 1)
             {
-                printf("usao\n");
+              //  printf("usao\n");
                 if(translaton_parameter_X<= 0  && translaton_parameter_Y<= -0.5 && rotation_parameter == 0 )
                 {
                     ID=0;
@@ -1934,7 +2000,7 @@ static void on_display2(void)
                     koordinate[1].RT = 0;
                     glTranslatef(0+koordinate[1].TR_X,0+koordinate[1].TR_Y,0);
                     glRotatef(-(0+koordinate[1].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                 //   printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1945,8 +2011,8 @@ static void on_display2(void)
                     koordinate[1].TR_Y = translaton_parameter_Y;
                     koordinate[1].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[1].TR_X, koordinate[1].TR_Y, koordinate[1].RT);
-                    printf("%f%f%f\n", tacke[1].slika_TX, tacke[1].slika_TY, tacke[1].slika_R);
+                  //  printf("%f %f %f\n",koordinate[1].TR_X, koordinate[1].TR_Y, koordinate[1].RT);
+                  //  printf("%f%f%f\n", tacke[1].slika_TX, tacke[1].slika_TY, tacke[1].slika_R);
                 }
             }
             else
@@ -1956,7 +2022,7 @@ static void on_display2(void)
             }
     
     
-        printf("%.2f %.2f %.2f\n",koordinate[1].TR_X, koordinate[1].TR_Y, koordinate[1].RT);
+        //printf("%.2f %.2f %.2f\n",koordinate[1].TR_X, koordinate[1].TR_Y, koordinate[1].RT);
         
         
              
@@ -1970,7 +2036,7 @@ static void on_display2(void)
     glPushMatrix();
          if(ID == 2)
             {
-                printf("usao\n");
+               // printf("usao\n");
                 if(translaton_parameter_X>= 0.5  && translaton_parameter_Y<=0 && rotation_parameter == 180 )
                 {
                     ID=0;
@@ -1980,7 +2046,7 @@ static void on_display2(void)
                     koordinate[2].RT = 180;
                     glTranslatef(0+koordinate[2].TR_X,0+koordinate[2].TR_Y,0);
                     glRotatef(-(0+koordinate[2].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                 //   printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -1991,8 +2057,8 @@ static void on_display2(void)
                     koordinate[2].TR_Y = translaton_parameter_Y;
                     koordinate[2].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[2].TR_X, koordinate[2].TR_Y, koordinate[2].RT);
-                    printf("%f%f%f\n", tacke[2].slika_TX, tacke[2].slika_TY, tacke[2].slika_R);
+                   // printf("%f %f %f\n",koordinate[2].TR_X, koordinate[2].TR_Y, koordinate[2].RT);
+                  //  printf("%f%f%f\n", tacke[2].slika_TX, tacke[2].slika_TY, tacke[2].slika_R);
                 }
             }
             else
@@ -2003,7 +2069,7 @@ static void on_display2(void)
 
         
         
-        printf("%.2f %.2f %.2f\n",koordinate[2].TR_X, koordinate[2].TR_Y, koordinate[2].RT);
+       // printf("%.2f %.2f %.2f\n",koordinate[2].TR_X, koordinate[2].TR_Y, koordinate[2].RT);
         
         VELIKI_TROUGAO2();
         
@@ -2016,7 +2082,7 @@ static void on_display2(void)
     glPushMatrix();
          if(ID == 3)
             {
-                printf("usao\n");
+             //   printf("usao\n");
                 if(translaton_parameter_X>= 0.25  && translaton_parameter_Y<= 0.5 && rotation_parameter == 0 )
                 {
                     ID=0;
@@ -2026,7 +2092,7 @@ static void on_display2(void)
                     koordinate[3].RT = 0;
                     glTranslatef(0+koordinate[3].TR_X,0+koordinate[3].TR_Y,0);
                     glRotatef(-(0+koordinate[3].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+              //      printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -2037,8 +2103,8 @@ static void on_display2(void)
                     koordinate[3].TR_Y = translaton_parameter_Y;
                     koordinate[3].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
-                    printf("%f%f%f\n", tacke[3].slika_TX, tacke[3].slika_TY, tacke[3].slika_R);
+            //        printf("%f %f %f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
+           //         printf("%f%f%f\n", tacke[3].slika_TX, tacke[3].slika_TY, tacke[3].slika_R);
                 }
             }
             else
@@ -2047,7 +2113,7 @@ static void on_display2(void)
                 glRotatef(-(0+koordinate[3].RT), 0, 0, 1);
             }
         
-        printf("%.2f %.2f %.2f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
+       // printf("%.2f %.2f %.2f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
     
     MALI_TROUGAO1();
     glPopMatrix();
@@ -2058,7 +2124,7 @@ static void on_display2(void)
     glPushMatrix();
         if(ID == 4)
             {
-                printf("usao\n");
+          //      printf("usao\n");
                 if(translaton_parameter_X<= 0.25  && translaton_parameter_Y<= 0.5 && rotation_parameter == 90 )
                 {
                     ID=0;
@@ -2068,7 +2134,7 @@ static void on_display2(void)
                     koordinate[4].RT = 90;
                     glTranslatef(0+koordinate[4].TR_X,0+koordinate[4].TR_Y,0);
                     glRotatef(-(0+koordinate[4].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+           //         printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -2079,8 +2145,8 @@ static void on_display2(void)
                     koordinate[4].TR_Y = translaton_parameter_Y;
                     koordinate[4].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
-                    printf("%f%f%f\n", tacke[4].slika_TX, tacke[4].slika_TY, tacke[4].slika_R);
+            //        printf("%f %f %f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
+            //        printf("%f%f%f\n", tacke[4].slika_TX, tacke[4].slika_TY, tacke[4].slika_R);
                 }
             }
             else
@@ -2091,7 +2157,7 @@ static void on_display2(void)
     
         
         
-        printf("%.2f %.2f %.2f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
+      //  printf("%.2f %.2f %.2f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
         
     MALI_TROUGAO2();
     glPopMatrix();
@@ -2103,7 +2169,7 @@ static void on_display2(void)
     glPushMatrix();
         if(ID == 5)
             {
-                printf("usao\n");
+             //   printf("usao\n");
                 if(translaton_parameter_X<=0.25/2   && translaton_parameter_Y<=0.25  && rotation_parameter == 0 )
                 {
                     ID=0;
@@ -2113,7 +2179,7 @@ static void on_display2(void)
                     koordinate[5].RT = 0;
                     glTranslatef(0+koordinate[5].TR_X,0+koordinate[5].TR_Y,0);
                     glRotatef(-(0+koordinate[5].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                //    printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -2124,8 +2190,8 @@ static void on_display2(void)
                     koordinate[5].TR_Y = translaton_parameter_Y;
                     koordinate[5].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
-                    printf("%f%f%f\n", tacke[5].slika_TX, tacke[5].slika_TY, tacke[5].slika_R);
+                  //  printf("%f %f %f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
+                   // printf("%f%f%f\n", tacke[5].slika_TX, tacke[5].slika_TY, tacke[5].slika_R);
                 }
             }
             else
@@ -2134,7 +2200,7 @@ static void on_display2(void)
                 glRotatef(-(0+koordinate[5].RT), 0, 0, 1);
             }
     
-    printf("%.2f %.2f %.2f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
+   // printf("%.2f %.2f %.2f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
     
     KVADRAT();
     glPopMatrix();
@@ -2148,7 +2214,7 @@ static void on_display2(void)
     glPushMatrix();
          if(ID == 6)
             {
-                printf("usao\n");
+         //       printf("usao\n");
                 if(translaton_parameter_X>= 0.25/2  && translaton_parameter_Y>= 0 && rotation_parameter == 0 )
                 {
                     ID=0;
@@ -2158,7 +2224,7 @@ static void on_display2(void)
                     koordinate[6].RT = 0;
                     glTranslatef(0+koordinate[6].TR_X,0+koordinate[6].TR_Y,0);
                     glRotatef(-(0+koordinate[6].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+          //          printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -2169,8 +2235,8 @@ static void on_display2(void)
                     koordinate[6].TR_Y = translaton_parameter_Y;
                     koordinate[6].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
-                    printf("%f%f%f\n", tacke[6].slika_TX, tacke[6].slika_TY, tacke[6].slika_R);
+            //        printf("%f %f %f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
+            //        printf("%f%f%f\n", tacke[6].slika_TX, tacke[6].slika_TY, tacke[6].slika_R);
                 }
             }
             else
@@ -2179,7 +2245,7 @@ static void on_display2(void)
                 glRotatef(-(0+koordinate[6].RT), 0, 0, 1);
             }
     
-    printf("%.2f %.2f %.2f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
+   // printf("%.2f %.2f %.2f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
     PARALELOGRA();
     glPopMatrix();
     
@@ -2188,7 +2254,7 @@ static void on_display2(void)
         
             if(ID == 7)
             {
-                printf("usao\n");
+             //   printf("usao\n");
                 if(translaton_parameter_X<= -0.25/2  && translaton_parameter_Y>= 0 && rotation_parameter == 0 )
                 {
                     ID=0;
@@ -2198,7 +2264,7 @@ static void on_display2(void)
                     koordinate[7].RT = 0;
                     glTranslatef(0+koordinate[7].TR_X,0+koordinate[7].TR_Y,0);
                     glRotatef(-(0+koordinate[7].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                 //   printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -2209,8 +2275,8 @@ static void on_display2(void)
                     koordinate[7].TR_Y = translaton_parameter_Y;
                     koordinate[7].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
-                    printf("%f%f%f\n", tacke[7].slika_TX, tacke[7].slika_TY, tacke[7].slika_R);
+                  //  printf("%f %f %f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
+                  //  printf("%f%f%f\n", tacke[7].slika_TX, tacke[7].slika_TY, tacke[7].slika_R);
                 }
             }
             else
@@ -2221,7 +2287,7 @@ static void on_display2(void)
         
     
     
-    printf("%.2f %.2f %.2f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
+  //  printf("%.2f %.2f %.2f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
     
     SREDNJI_TROUGAO();
     glPopMatrix();
@@ -2259,7 +2325,7 @@ static void on_display1(void)
     
         if(ID == 1)
             {
-                printf("usao\n");
+              //  printf("usao\n");
                 if(translaton_parameter_X<= 0  && translaton_parameter_Y<= -0.5 && rotation_parameter == 0 )
                 {
                     ID=0;
@@ -2269,7 +2335,7 @@ static void on_display1(void)
                     koordinate[1].RT = 0;
                     glTranslatef(0+koordinate[1].TR_X,0+koordinate[1].TR_Y,0);
                     glRotatef(-(0+koordinate[1].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                //    printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -2280,8 +2346,8 @@ static void on_display1(void)
                     koordinate[1].TR_Y = translaton_parameter_Y;
                     koordinate[1].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[1].TR_X, koordinate[1].TR_Y, koordinate[1].RT);
-                    printf("%f%f%f\n", tacke[1].slika_TX, tacke[1].slika_TY, tacke[1].slika_R);
+                  //  printf("%f %f %f\n",koordinate[1].TR_X, koordinate[1].TR_Y, koordinate[1].RT);
+                  //  printf("%f%f%f\n", tacke[1].slika_TX, tacke[1].slika_TY, tacke[1].slika_R);
                 }
             }
             else
@@ -2291,7 +2357,7 @@ static void on_display1(void)
             }
     
     
-        printf("%.2f %.2f %.2f\n",koordinate[1].TR_X, koordinate[1].TR_Y, koordinate[1].RT);
+      //  printf("%.2f %.2f %.2f\n",koordinate[1].TR_X, koordinate[1].TR_Y, koordinate[1].RT);
         
         
              
@@ -2305,7 +2371,7 @@ static void on_display1(void)
     glPushMatrix();
          if(ID == 2)
             {
-                printf("usao\n");
+   //             printf("usao\n");
                 if(translaton_parameter_X>= 0.5  && translaton_parameter_Y<=0 && rotation_parameter == 180 )
                 {
                     ID=0;
@@ -2315,7 +2381,7 @@ static void on_display1(void)
                     koordinate[2].RT = 180;
                     glTranslatef(0+koordinate[2].TR_X,0+koordinate[2].TR_Y,0);
                     glRotatef(-(0+koordinate[2].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+   //                 printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -2326,8 +2392,8 @@ static void on_display1(void)
                     koordinate[2].TR_Y = translaton_parameter_Y;
                     koordinate[2].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[2].TR_X, koordinate[2].TR_Y, koordinate[2].RT);
-                    printf("%f%f%f\n", tacke[2].slika_TX, tacke[2].slika_TY, tacke[2].slika_R);
+   //                 printf("%f %f %f\n",koordinate[2].TR_X, koordinate[2].TR_Y, koordinate[2].RT);
+   //                 printf("%f%f%f\n", tacke[2].slika_TX, tacke[2].slika_TY, tacke[2].slika_R);
                 }
             }
             else
@@ -2338,7 +2404,7 @@ static void on_display1(void)
 
         
         
-        printf("%.2f %.2f %.2f\n",koordinate[2].TR_X, koordinate[2].TR_Y, koordinate[2].RT);
+   //     printf("%.2f %.2f %.2f\n",koordinate[2].TR_X, koordinate[2].TR_Y, koordinate[2].RT);
         
         VELIKI_TROUGAO2();
         
@@ -2351,7 +2417,7 @@ static void on_display1(void)
     glPushMatrix();
          if(ID == 3)
             {
-                printf("usao\n");
+   //             printf("usao\n");
                 if(translaton_parameter_X>= 0.25  && translaton_parameter_Y>= 0.5 && rotation_parameter == 0 )
                 {
                     ID=0;
@@ -2361,7 +2427,7 @@ static void on_display1(void)
                     koordinate[3].RT = 0;
                     glTranslatef(0+koordinate[3].TR_X,0+koordinate[3].TR_Y,0);
                     glRotatef(-(0+koordinate[3].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+   //                 printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -2372,8 +2438,8 @@ static void on_display1(void)
                     koordinate[3].TR_Y = translaton_parameter_Y;
                     koordinate[3].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
-                    printf("%f%f%f\n", tacke[3].slika_TX, tacke[3].slika_TY, tacke[3].slika_R);
+                  //  printf("%f %f %f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
+                  //  printf("%f%f%f\n", tacke[3].slika_TX, tacke[3].slika_TY, tacke[3].slika_R);
                 }
             }
             else
@@ -2382,7 +2448,7 @@ static void on_display1(void)
                 glRotatef(-(0+koordinate[3].RT), 0, 0, 1);
             }
         
-        printf("%.2f %.2f %.2f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
+       // printf("%.2f %.2f %.2f\n",koordinate[3].TR_X, koordinate[3].TR_Y, koordinate[3].RT);
     
     MALI_TROUGAO1();
     glPopMatrix();
@@ -2393,7 +2459,7 @@ static void on_display1(void)
     glPushMatrix();
         if(ID == 4)
             {
-                printf("usao\n");
+             //   printf("usao\n");
                 if(translaton_parameter_X<= 0.25  && translaton_parameter_Y<= 0.5 && rotation_parameter == 90 )
                 {
                     ID=0;
@@ -2403,7 +2469,7 @@ static void on_display1(void)
                     koordinate[4].RT = 90;
                     glTranslatef(0+koordinate[4].TR_X,0+koordinate[4].TR_Y,0);
                     glRotatef(-(0+koordinate[4].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+              //      printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -2414,8 +2480,8 @@ static void on_display1(void)
                     koordinate[4].TR_Y = translaton_parameter_Y;
                     koordinate[4].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
-                    printf("%f%f%f\n", tacke[4].slika_TX, tacke[4].slika_TY, tacke[4].slika_R);
+                  //  printf("%f %f %f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
+                   // printf("%f%f%f\n", tacke[4].slika_TX, tacke[4].slika_TY, tacke[4].slika_R);
                 }
             }
             else
@@ -2426,7 +2492,7 @@ static void on_display1(void)
     
         
         
-        printf("%.2f %.2f %.2f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
+       // printf("%.2f %.2f %.2f\n",koordinate[4].TR_X, koordinate[4].TR_Y, koordinate[4].RT);
         
     MALI_TROUGAO2();
     glPopMatrix();
@@ -2438,7 +2504,7 @@ static void on_display1(void)
     glPushMatrix();
         if(ID == 5)
             {
-                printf("usao\n");
+              //  printf("usao\n");
                 if(translaton_parameter_X<=0.25/2   && translaton_parameter_Y<=0.25  && rotation_parameter == 0 )
                 {
                     ID=0;
@@ -2448,7 +2514,7 @@ static void on_display1(void)
                     koordinate[5].RT = 0;
                     glTranslatef(0+koordinate[5].TR_X,0+koordinate[5].TR_Y,0);
                     glRotatef(-(0+koordinate[5].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                   // printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -2459,8 +2525,8 @@ static void on_display1(void)
                     koordinate[5].TR_Y = translaton_parameter_Y;
                     koordinate[5].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
-                    printf("%f%f%f\n", tacke[5].slika_TX, tacke[5].slika_TY, tacke[5].slika_R);
+                    //printf("%f %f %f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
+                   // printf("%f%f%f\n", tacke[5].slika_TX, tacke[5].slika_TY, tacke[5].slika_R);
                 }
             }
             else
@@ -2469,7 +2535,7 @@ static void on_display1(void)
                 glRotatef(-(0+koordinate[5].RT), 0, 0, 1);
             }
     
-    printf("%.2f %.2f %.2f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
+    //printf("%.2f %.2f %.2f\n",koordinate[5].TR_X, koordinate[5].TR_Y, koordinate[5].RT);
     
     KVADRAT();
     glPopMatrix();
@@ -2483,7 +2549,8 @@ static void on_display1(void)
     glPushMatrix();
          if(ID == 6)
             {
-                printf("usao\n");
+              
+                //  printf("usao\n");
                 if(translaton_parameter_X>= 0.25/2  && translaton_parameter_Y>= 0 && rotation_parameter == 0 )
                 {
                     ID=0;
@@ -2493,7 +2560,7 @@ static void on_display1(void)
                     koordinate[6].RT = 0;
                     glTranslatef(0+koordinate[6].TR_X,0+koordinate[6].TR_Y,0);
                     glRotatef(-(0+koordinate[6].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+                //    printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -2504,8 +2571,8 @@ static void on_display1(void)
                     koordinate[6].TR_Y = translaton_parameter_Y;
                     koordinate[6].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
-                    printf("%f%f%f\n", tacke[6].slika_TX, tacke[6].slika_TY, tacke[6].slika_R);
+                  //  printf("%f %f %f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
+                    //printf("%f%f%f\n", tacke[6].slika_TX, tacke[6].slika_TY, tacke[6].slika_R);
                 }
             }
             else
@@ -2514,7 +2581,7 @@ static void on_display1(void)
                 glRotatef(-(0+koordinate[6].RT), 0, 0, 1);
             }
     
-    printf("%.2f %.2f %.2f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
+    //printf("%.2f %.2f %.2f\n",koordinate[6].TR_X, koordinate[6].TR_Y, koordinate[6].RT);
     PARALELOGRA();
     glPopMatrix();
     
@@ -2523,7 +2590,7 @@ static void on_display1(void)
         
             if(ID == 7)
             {
-                printf("usao\n");
+//                printf("usao\n");
                 if(translaton_parameter_X<= -0.25/2  && translaton_parameter_Y>= 0 && rotation_parameter == 0 )
                 {
                     ID=0;
@@ -2533,7 +2600,7 @@ static void on_display1(void)
                     koordinate[7].RT = 0;
                     glTranslatef(0+koordinate[7].TR_X,0+koordinate[7].TR_Y,0);
                     glRotatef(-(0+koordinate[7].RT), 0, 0, 1);
-                    printf("aaaaaaaaaaaaaa");
+//                    printf("aaaaaaaaaaaaaa");
                 
                 }else{
                 
@@ -2544,8 +2611,8 @@ static void on_display1(void)
                     koordinate[7].TR_Y = translaton_parameter_Y;
                     koordinate[7].RT = rotation_parameter;
                     
-                    printf("%f %f %f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
-                    printf("%f%f%f\n", tacke[7].slika_TX, tacke[7].slika_TY, tacke[7].slika_R);
+  //                  printf("%f %f %f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
+    //                printf("%f%f%f\n", tacke[7].slika_TX, tacke[7].slika_TY, tacke[7].slika_R);
                 }
             }
             else
@@ -2556,7 +2623,7 @@ static void on_display1(void)
         
     
     
-    printf("%.2f %.2f %.2f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
+  //  printf("%.2f %.2f %.2f\n",koordinate[7].TR_X, koordinate[7].TR_Y, koordinate[7].RT);
     
     SREDNJI_TROUGAO();
     glPopMatrix();
@@ -2566,7 +2633,10 @@ glPopMatrix();
 	
     glutSwapBuffers();
 } 
-   
+
+
+// oblici za slaganje
+
    
 void VELIKI_TROUGAO1()
 {
@@ -2658,7 +2728,9 @@ void SREDNJI_TROUGAO()
     glPopMatrix();
 }
 
-     static void draw_debug_coosys()
+
+
+static void draw_debug_coosys()
      {
          glDisable(GL_LIGHTING);
          glBegin(GL_LINES);

@@ -10,4 +10,4 @@ Kada se slaže tangram na tastere bojeva od 1 do 7 pomeraju se elementi, na nač
 5 - kvadrat
 6 - paralelogram
 7 - srednji trougao,
-Svaki od ovih elemenata ima svoje mesto na slici, tj. figuri koja se iscrtava, pomeranjem na tastere "a","s","d","w" se vrši translacija, pomeranje, levo, dole, desno, gore, a na "l" i "j" rotira elemenate. Kada elementu nađemo mesto više ne možemo da pomeramo taj element. Kad više ne možemo da pokrećemo ni jedan element tada smo sastavili celu sliku.
+Svaki od ovih elemenata ima svoje mesto na slici, tj. figuri koja se iscrtava, pomeranjem na tastere "a" - levo,"x"-dole,"d" -desno,"w" -gore se vrši translacija, pomeranje, levo, dole, desno, gore, a na "l" i "j" rotira elemenate. Kada elementu nađemo mesto više ne možemo da pomeramo taj element. Kad više ne možemo da pokrećemo ni jedan element tada smo sastavili celu sliku.

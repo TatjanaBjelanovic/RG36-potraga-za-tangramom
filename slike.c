@@ -41,7 +41,7 @@ void slika6()
             glColor3f(1, 0, 0);
             
             glTranslatef(0.25/2,-0.25,0);
-            glRotatef(-90,0,0,1);
+            glRotatef(270,0,0,1);
                         
             glBegin(GL_POLYGON);
                 glVertex3f(0, 0, 0);
@@ -275,7 +275,7 @@ void slika4()
             
             
             glTranslatef(0,-0.25/2,0);
-            glRotatef(-90,0,0,1);
+            glRotatef(270,0,0,1);
             
             glBegin(GL_POLYGON);
                 glVertex3f(0, 0, 0);
@@ -386,7 +386,7 @@ void slika3()
             glColor3f(1, 0, 0);
             
             glTranslatef(0.5,0.35,0);
-            glRotatef(-45,0,0,1);
+            glRotatef(315,0,0,1);
             
             glBegin(GL_POLYGON);
                 glVertex3f(0, 0, 0);
@@ -450,7 +450,7 @@ void slika2()
     glPushMatrix();
             glColor3f(1, 0, 1);
             
-            glRotatef(-90,0,0,1);
+            glRotatef(270,0,0,1);
             
             glBegin(GL_POLYGON);
                 glVertex3f(0, 0, 0);
